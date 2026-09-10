@@ -1,0 +1,30 @@
+name: 예약 실행 유지
+
+# GitHub 는 60일간 커밋 활동이 없는 저장소의 예약 워크플로를 자동 비활성화한다.
+# 매월 1일 1줄 커밋을 남겨 60일 카운터를 초기화한다. (연 12건)
+# push 트리거가 없으므로 이 커밋이 다른 워크플로를 유발하지 않는다.
+
+on:
+  schedule:
+    - cron: "17 3 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 타임스탬프 커밋
+        run: |
+          date -u +'%Y-%m-%dT%H:%M:%SZ' > .keepalive
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .keepalive
+          git commit -m "chore: 예약 실행 유지 ($(date -u +%Y-%m))" || exit 0
+          git push origin HEAD:${{ github.ref_name }}
