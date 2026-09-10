@@ -1,0 +1,56 @@
+name: 관제실 일일 갱신
+
+on:
+  schedule:
+    # 매일 22:00 UTC = 07:00 KST (미국 정규장 마감 이후)
+    - cron: "0 22 * * *"
+  workflow_dispatch:        # GitHub 웹에서 수동 실행 가능
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 파이썬 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 관제실 빌드
+        env:
+          CONTACT_UA: "macro-console (contact: a01092796847@gmail.com)"
+          # 직전 결과(13F 캐시)를 현재 공개 중인 페이지에서 가져온다
+          PREV_PAYLOAD_URL: "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/payload.json"
+        run: python build_console.py
+
+      - name: 산출물 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: GitHub Pages 배포
+        id: deployment
+        uses: actions/deploy-pages@v4
