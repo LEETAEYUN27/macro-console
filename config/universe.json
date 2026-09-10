@@ -1,0 +1,234 @@
+{
+  "indices": [
+    {
+      "name": "S&P 500",
+      "ticker": "^GSPC"
+    },
+    {
+      "name": "나스닥 종합",
+      "ticker": "^IXIC"
+    },
+    {
+      "name": "다우존스",
+      "ticker": "^DJI"
+    },
+    {
+      "name": "러셀 2000",
+      "ticker": "^RUT"
+    },
+    {
+      "name": "코스피",
+      "ticker": "^KS11"
+    },
+    {
+      "name": "코스닥",
+      "ticker": "^KQ11"
+    },
+    {
+      "name": "닛케이 225",
+      "ticker": "^N225"
+    },
+    {
+      "name": "항셍",
+      "ticker": "^HSI"
+    },
+    {
+      "name": "유로 STOXX 50",
+      "ticker": "^STOXX50E"
+    },
+    {
+      "name": "필라델피아 반도체",
+      "ticker": "^SOX"
+    },
+    {
+      "name": "VIX 변동성",
+      "ticker": "^VIX"
+    }
+  ],
+  "commodities": [
+    {
+      "name": "금",
+      "ticker": "GC=F"
+    },
+    {
+      "name": "은",
+      "ticker": "SI=F"
+    },
+    {
+      "name": "WTI 원유",
+      "ticker": "CL=F"
+    },
+    {
+      "name": "브렌트유",
+      "ticker": "BZ=F"
+    },
+    {
+      "name": "구리",
+      "ticker": "HG=F"
+    },
+    {
+      "name": "천연가스",
+      "ticker": "NG=F"
+    },
+    {
+      "name": "백금",
+      "ticker": "PL=F"
+    },
+    {
+      "name": "비트코인",
+      "ticker": "BTC-USD"
+    }
+  ],
+  "fx_rates": [
+    {
+      "name": "달러지수(DXY)",
+      "ticker": "DX-Y.NYB"
+    },
+    {
+      "name": "원/달러",
+      "ticker": "KRW=X"
+    },
+    {
+      "name": "엔/달러",
+      "ticker": "JPY=X"
+    },
+    {
+      "name": "유로/달러",
+      "ticker": "EURUSD=X"
+    },
+    {
+      "name": "위안/달러",
+      "ticker": "CNY=X"
+    },
+    {
+      "name": "미 10년물",
+      "ticker": "^TNX"
+    },
+    {
+      "name": "미 5년물",
+      "ticker": "^FVX"
+    },
+    {
+      "name": "미 13주(3개월)",
+      "ticker": "^IRX"
+    }
+  ],
+  "sectors_us": [
+    {
+      "name": "기술",
+      "ticker": "XLK"
+    },
+    {
+      "name": "금융",
+      "ticker": "XLF"
+    },
+    {
+      "name": "에너지",
+      "ticker": "XLE"
+    },
+    {
+      "name": "헬스케어",
+      "ticker": "XLV"
+    },
+    {
+      "name": "산업재",
+      "ticker": "XLI"
+    },
+    {
+      "name": "경기소비재",
+      "ticker": "XLY"
+    },
+    {
+      "name": "필수소비재",
+      "ticker": "XLP"
+    },
+    {
+      "name": "유틸리티",
+      "ticker": "XLU"
+    },
+    {
+      "name": "소재",
+      "ticker": "XLB"
+    },
+    {
+      "name": "부동산",
+      "ticker": "XLRE"
+    },
+    {
+      "name": "커뮤니케이션",
+      "ticker": "XLC"
+    }
+  ],
+  "sectors_kr": [
+    {
+      "name": "KODEX 반도체",
+      "ticker": "091160.KS"
+    },
+    {
+      "name": "KODEX 은행",
+      "ticker": "091170.KS"
+    },
+    {
+      "name": "KODEX 에너지화학",
+      "ticker": "117460.KS"
+    },
+    {
+      "name": "KODEX IT",
+      "ticker": "266370.KS"
+    },
+    {
+      "name": "TIGER 헬스케어",
+      "ticker": "227540.KS"
+    },
+    {
+      "name": "KODEX 기계장비",
+      "ticker": "102960.KS"
+    },
+    {
+      "name": "TIGER 200 IT",
+      "ticker": "139260.KS"
+    },
+    {
+      "name": "TIGER 화장품",
+      "ticker": "228790.KS"
+    }
+  ],
+  "realestate": [
+    {
+      "name": "미 리츠(VNQ)",
+      "ticker": "VNQ"
+    },
+    {
+      "name": "미 부동산(IYR)",
+      "ticker": "IYR"
+    },
+    {
+      "name": "미 주거리츠",
+      "ticker": "REZ"
+    },
+    {
+      "name": "미 리츠(SCHH)",
+      "ticker": "SCHH"
+    },
+    {
+      "name": "KINDEX 미국리츠",
+      "ticker": "181480.KS"
+    },
+    {
+      "name": "TIGER 리츠부동산",
+      "ticker": "329200.KS"
+    },
+    {
+      "name": "맥쿼리인프라",
+      "ticker": "088980.KS"
+    },
+    {
+      "name": "ESR켄달스퀘어리츠",
+      "ticker": "365550.KS"
+    },
+    {
+      "name": "롯데리츠",
+      "ticker": "330590.KS"
+    }
+  ]
+}
