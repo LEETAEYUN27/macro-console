@@ -1,0 +1,6 @@
+# 매 실행마다 새로 생성되어 GitHub Pages 로 직접 배포되므로 저장소에 담지 않는다
+docs/index.html
+docs/payload.json
+docs/build.log
+__pycache__/
+*.pyc
