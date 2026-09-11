@@ -273,6 +273,108 @@ def build_stability(vix_last):
 
 
 # ──────────────────────────────────────────────────────────────
+# 2-b. 쏠림 지표 (SPY − RSP 12개월 수익률 격차)
+# ──────────────────────────────────────────────────────────────
+def build_concentration():
+    """시가총액 가중(SPY)과 동일가중(RSP)의 12개월 수익률 격차.
+
+    값이 클수록 소수 대형주가 지수를 끌고 가는 쏠림 국면이다.
+    보유 포트폴리오가 대형 AI주에 집중돼 있으므로, 이 격차의 '축소 전환'이
+    개별 종목 악재보다 먼저 오는 조기 경보 신호가 된다.
+    """
+    import yfinance as yf
+
+    try:
+        px = {}
+        for tk in ("SPY", "RSP"):
+            h = yf.Ticker(tk).history(period="max", interval="1d", auto_adjust=True)
+            if h.empty:
+                raise RuntimeError(f"{tk} 시세 없음")
+            s = h["Close"].dropna()
+            s.index = pd.to_datetime(s.index).tz_localize(None)
+            px[tk] = s
+            time.sleep(0.4)
+        df = pd.DataFrame(px).dropna()
+        if len(df) < 300:
+            raise RuntimeError("표본 부족")
+
+        W = 252                                     # 12개월
+        spread = ((df["SPY"] / df["SPY"].shift(W) - 1)
+                  - (df["RSP"] / df["RSP"].shift(W) - 1)) * 100
+        spread = spread.dropna()
+
+        last = float(spread.iloc[-1])
+        asof = spread.index[-1]
+        pctile = float((spread <= last).mean() * 100)
+        d63 = float(last - spread.iloc[-64]) if len(spread) > 64 else None
+        d126 = float(last - spread.iloc[-127]) if len(spread) > 127 else None
+
+        # 수준 : 이력 백분위 기준
+        if pctile >= 90:
+            level, lcol = "극단 쏠림", "down"
+        elif pctile >= 70:
+            level, lcol = "쏠림 확대", "warn"
+        elif pctile >= 30:
+            level, lcol = "중립", "blue"
+        else:
+            level, lcol = "분산 우위", "up"
+
+        # 방향 : 최근 3개월 변화
+        if d63 is None:
+            trend = "판단 보류"
+        elif d63 <= -1.0:
+            trend = "축소 전환"
+        elif d63 >= 1.0:
+            trend = "확대 진행"
+        else:
+            trend = "횡보"
+
+        alert = bool(pctile >= 60 and d63 is not None and d63 <= -1.0)
+        if alert:
+            comment = (f"쏠림이 되돌아오는 중이다. 12개월 격차가 3개월 만에 {d63:+.1f}%p 줄었다. "
+                       "대형 AI주 집중 포트폴리오와 모멘텀 노출은 같은 방향 리스크이므로, "
+                       "이 국면에서는 두 손실이 동시에 발생한다. 신규 집중 매수를 늦추고 편중도를 점검할 것.")
+        elif trend == "확대 진행" and pctile >= 70:
+            comment = ("소수 대형주로의 쏠림이 계속 강해지고 있다. 지수는 버티지만 평균적인 종목은 그렇지 않은 국면이며, "
+                       "되돌림이 시작되면 조정 폭이 커진다. 신규 진입은 분할로 제한할 것.")
+        elif pctile < 30:
+            comment = ("동일가중이 시가총액 가중을 앞서는 분산 국면이다. 대형주 편중의 상대적 불리함이 이미 반영된 구간으로, "
+                       "집중 포트폴리오의 추가 하방 압력은 제한적이다.")
+        else:
+            comment = ("쏠림 강도는 역사적 중간 수준이다. 격차의 절대 수준보다 방향 전환 시점이 중요하므로, "
+                       "3개월 변화가 −1%p를 밑도는지 계속 볼 것.")
+
+        # 차트용 : 최근 12년 월말 표본
+        m = spread.resample("ME").last().dropna()
+        m = m[m.index >= (asof - pd.DateOffset(years=12))]
+        series = [[i.strftime("%Y-%m"), round(float(v), 2)] for i, v in m.items()]
+
+        yearly = []
+        for y in sorted({i.year for i in spread.index})[-8:]:
+            sub = spread[spread.index.year == y]
+            yearly.append({"year": int(y), "avg": round(float(sub.mean()), 2),
+                           "end": round(float(sub.iloc[-1]), 2)})
+
+        log(f"  쏠림 격차 {last:+.2f}%p (백분위 {pctile:.0f}%, 3개월 {d63:+.2f}%p) — {level}·{trend}")
+        return {
+            "last": round(last, 2),
+            "asof": asof.strftime("%Y-%m-%d"),
+            "pctile": round(pctile, 1),
+            "chg_3m": None if d63 is None else round(d63, 2),
+            "chg_6m": None if d126 is None else round(d126, 2),
+            "level": level, "level_color": lcol, "trend": trend, "alert": alert,
+            "comment": comment,
+            "hi": round(float(spread.max()), 2), "hi_at": spread.idxmax().strftime("%Y-%m"),
+            "lo": round(float(spread.min()), 2), "lo_at": spread.idxmin().strftime("%Y-%m"),
+            "series": series, "yearly": yearly,
+            "method": "SPY(시총가중) 12개월 수익률 − RSP(동일가중) 12개월 수익률 · 일별 산출",
+        }
+    except Exception as e:  # noqa: BLE001
+        log(f"  ! 쏠림 지표 실패 :: {e}")
+        return None
+
+
+# ──────────────────────────────────────────────────────────────
 # 3. 부동산
 # ──────────────────────────────────────────────────────────────
 def build_housing():
@@ -516,6 +618,12 @@ def main():
     stability, effr = build_stability(vix)
     log(f"  경제 안정성 {stability['score']} ({stability['label']})")
 
+    log("2-b/5 쏠림 지표 (SPY vs RSP)")
+    concentration = build_concentration()
+    if concentration is None and prev.get("concentration"):
+        log("  직전 쏠림 지표 유지")
+        concentration = prev["concentration"]
+
     log("3/5 부동산")
     housing = build_housing()
 
@@ -530,6 +638,7 @@ def main():
         "groups": groups,
         "institutions": institutions,
         "stability": stability,
+        "concentration": concentration,
         "housing": housing,
         "rate_odds": rate_odds,
         "events": narrative["events"],
