@@ -344,6 +344,57 @@ function secHead(t,note){const d=el('div','sec-h');d.innerHTML=`<h2>${t}</h2><sp
 
 const SECTIONS=[
  ['markets','시장', s=>{
+    if(D.concentration){
+      const C=D.concentration;
+      s.appendChild(secHead('시장 쏠림 지표',C.method));
+      const colmap={down:'var(--down)',warn:'var(--warn)',blue:'var(--blue)',up:'var(--up)'};
+      const lc=colmap[C.level_color]||'var(--blue)';
+      const tc=C.trend==='축소 전환'?'var(--down)':(C.trend==='확대 진행'?'var(--warn)':'var(--ink-2)');
+      const p=el('div','panel pad');
+      p.innerHTML=`
+        ${C.alert?`<div style="display:flex;gap:8px;align-items:center;background:color-mix(in srgb,var(--down) 14%,transparent);
+            border:1px solid color-mix(in srgb,var(--down) 38%,transparent);border-radius:8px;padding:9px 12px;margin-bottom:13px">
+            <b style="color:var(--down);font-size:13px">경보</b>
+            <span style="font-size:13px">쏠림 되돌림 진행 — 집중 포트폴리오 점검 구간</span></div>`:''}
+        <div style="display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start">
+          <div>
+            <div class="tag">12개월 격차 (SPY − RSP)</div>
+            <div class="num" style="font-size:34px;font-weight:600;line-height:1.1;color:${lc}">
+              ${C.last>0?'+':''}${C.last.toFixed(2)}<span style="font-size:17px">%p</span></div>
+            <div class="num" style="font-size:12px;color:var(--ink-3)">기준 ${C.asof}</div>
+          </div>
+          <div>
+            <div class="tag">수준</div>
+            <div style="font-size:19px;font-weight:600;color:${lc}">${C.level}</div>
+            <div style="font-size:12px;color:var(--ink-3)">이력 백분위 ${C.pctile.toFixed(0)}%</div>
+            <div class="meter" style="margin-top:6px;width:150px"><i style="width:${C.pctile.toFixed(0)}%;background:${lc}"></i></div>
+          </div>
+          <div>
+            <div class="tag">방향</div>
+            <div style="font-size:19px;font-weight:600;color:${tc}">${C.trend}</div>
+            <div class="num" style="font-size:12.5px;color:var(--ink-2)">
+              3개월 ${C.chg_3m==null?'–':(C.chg_3m>0?'+':'')+C.chg_3m.toFixed(2)+'%p'}
+              &nbsp;·&nbsp; 6개월 ${C.chg_6m==null?'–':(C.chg_6m>0?'+':'')+C.chg_6m.toFixed(2)+'%p'}</div>
+            <div class="num" style="font-size:12px;color:var(--ink-3);margin-top:3px">
+              이력 최대 ${C.hi>0?'+':''}${C.hi.toFixed(1)}%p (${C.hi_at}) · 최소 ${C.lo.toFixed(1)}%p (${C.lo_at})</div>
+          </div>
+        </div>
+        <div style="margin-top:13px;font-size:12.5px;color:var(--ink-2);line-height:1.6">${C.comment}</div>
+        <div class="cchart" style="margin-top:10px"></div>
+        <div style="margin-top:12px;font-size:12px;color:var(--ink-3);line-height:1.6">
+          <b style="color:var(--ink-2)">읽는 법</b> — 양수는 소수 대형주가 지수를 끌고 가는 쏠림 국면, 음수는 평균적인 종목이 더 오르는 분산 국면.
+          절대 수준보다 <b style="color:var(--ink-2)">방향 전환</b>이 중요하며, 백분위 60% 이상에서 3개월 변화가 −1%p를 밑돌면 경보로 표시한다.</div>`;
+      s.appendChild(p);
+      lineChart(p.querySelector('.cchart'),C.series,{color:css('--gold'),title:'SPY − RSP 12개월 격차(%p)'});
+      if(C.yearly&&C.yearly.length){
+        const t=el('div','panel scroll');t.style.marginTop='12px';
+        t.innerHTML=`<table><thead><tr><th>연도</th><th style="text-align:right">평균 격차</th><th style="text-align:right">연말 격차</th></tr></thead>
+          <tbody>${C.yearly.map(y=>`<tr><td class="num">${y.year}</td>
+            <td class="n ${y.avg>0?'up':'down'}">${y.avg>0?'+':''}${y.avg.toFixed(2)}%p</td>
+            <td class="n ${y.end>0?'up':'down'}">${y.end>0?'+':''}${y.end.toFixed(2)}%p</td></tr>`).join('')}</tbody></table>`;
+        s.appendChild(t);
+      }
+    }
     [['주가지수','indices'],['원자재','commodities'],['환율·금리','fx_rates']].forEach(([t,k])=>{
       s.appendChild(secHead(t,'타일을 누르면 연도별 추이'));
       s.appendChild(tileGrid(D.groups[k]));
